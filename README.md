@@ -1,3 +1,70 @@
+EN
+👋 Hello, I'm Onur Güner!
+
+🚀 About Me
+
+Hello! I'm Onur Güner, a developer working on software development and automation systems. I create software solutions to simplify work processes, optimize workflows, and develop user-friendly applications.
+
+👀 My Interests
+
+Full Stack Web Development (React, Next.js, Node.js, TypeScript)
+
+Artificial Intelligence and Automation Systems
+
+Company Management Applications & Business Process Automation
+
+Smart Home Systems & IoT Solutions
+
+Game Development (Unity, C#)
+
+Google Apps Script & Spreadsheet Automations
+
+🌱 Currently Learning
+
+Developing scalable web projects using Next.js App Router
+
+Creating modern UI components with Shadcn UI, Radix UI, and Tailwind
+
+Practicing Docker and container technologies
+
+Performance-focused modular and declarative programming techniques
+
+💼 Projects I'm Working On
+
+Company Management Application: A comprehensive application that includes employee management, shift planning, notification systems, and a maker-checker structure.
+
+Training Tracking System: A system integrated with Google Sheets API to monitor training plans.
+
+Memory Universe - Journey in the Mind: A puzzle-adventure game themed around memory loss.
+
+Claude AI-Powered Spam Filtering System: A system that analyzes emails and detects spam.
+
+💞 Looking to Collaborate On
+
+Contributing to open-source projects
+
+Teamwork in Full Stack web projects
+
+Collaborating on Google Apps Script and automation projects
+
+📫 Contact Me
+
+LinkedIn: [linkedin.com/in/onurguner](https://www.linkedin.com/in/onur-guner-a6740823b/)
+
+GitHub: github.com/OnurGuner5728
+
+😄 Pronouns
+
+He / His
+
+⚡ Fun Fact
+
+My three-and-a-half-year-old daughter, Başak, constantly asks me interesting questions, helping me rediscover life. 🚀
+
+
+
+
+TR
 👋 Merhaba, ben Onur Güner!
 
 🚀 Hakkımda
@@ -48,7 +115,7 @@ Google Apps Script ve otomasyon projelerinde iş birliği
 
 📫 Bana Ulaşın
 
-LinkedIn: linkedin.com/in/onurguner
+LinkedIn: [linkedin.com/in/onurguner](https://www.linkedin.com/in/onur-guner-a6740823b/)
 
 GitHub: github.com/OnurGuner5728
 

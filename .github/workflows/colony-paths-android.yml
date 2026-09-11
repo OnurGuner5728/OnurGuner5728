@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - build/colony-paths-20260911
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:

@@ -1,0 +1,133 @@
+name: Colony Paths Android Build
+
+on:
+  push:
+    branches:
+      - build/colony-paths-20260911
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GODOT_SILENCE_ROOT_WARNING: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reconstruct verified source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p game
+          cat .ci/colony/part_*.txt | base64 -d > /tmp/colony-src.tar.gz
+          echo "bc837216440e66abd0ff97cb4968f875047818b812274eefe05dde66cef5e366  /tmp/colony-src.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/colony-src.tar.gz -C game
+          test -f game/project.godot
+          test -f game/export_presets.cfg
+          test -f game/android_debug.keystore
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "build-tools;35.0.1" "platforms;android-35"
+
+      - name: Setup Godot 4.7.2
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Generate deterministic release content
+        working-directory: game
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pytest pillow
+          python -m tools.levelgen.generate_levels
+          python -m tools.artgen.generate_reveal_art
+          python -m tools.artgen.generate_audio
+          python -m tools.levelgen.validate_release
+
+      - name: Verify generated content and Python tests
+        working-directory: game
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find levels/release -name 'level_*.json' | wc -l)" -eq 120
+          test "$(find art/reveal -name 'level_*.png' | wc -l)" -eq 120
+          test "$(find audio -name '*.wav' | wc -l)" -eq 6
+          python -m pytest tools/oracle/tests -q
+
+      - name: Install GUT
+        working-directory: game
+        run: bash scripts/ci_install_gut.sh
+
+      - name: Godot import and parse
+        working-directory: game
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --version
+          godot --headless --editor --path . --quit-after 10
+
+      - name: Godot tests and smoke
+        working-directory: game
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/run_tests.sh
+          bash scripts/smoke_release.sh
+
+      - name: Export signed Android APK
+        working-directory: game
+        run: bash scripts/build_android_debug.sh
+
+      - name: Verify Android install contract
+        working-directory: game
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAPT="$ANDROID_HOME/build-tools/35.0.1/aapt"
+          APKSIGNER="$ANDROID_HOME/build-tools/35.0.1/apksigner"
+          APK="build/android/ColonyPaths-debug.apk"
+          test -s "$APK"
+          "$AAPT" dump badging "$APK" | tee build/android/aapt-badging.txt
+          "$APKSIGNER" verify --verbose --print-certs "$APK" | tee build/android/apksigner.txt
+          sha256sum "$APK" | tee build/android/ColonyPaths-debug.sha256
+          grep -q "package: name='com.onur.colonypaths'" build/android/aapt-badging.txt
+          grep -q "versionCode='2'" build/android/aapt-badging.txt
+          grep -q "Verified using v2 scheme (APK Signature Scheme v2): true" build/android/apksigner.txt
+
+      - name: Upload verified APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ColonyPaths-Installable-APK
+          path: |
+            game/build/android/ColonyPaths-debug.apk
+            game/build/android/ColonyPaths-debug.sha256
+            game/build/android/aapt-badging.txt
+            game/build/android/apksigner.txt
+            game/reports/level_validation_report.json
+          if-no-files-found: error
